@@ -16,6 +16,13 @@ class MoviesView(APIView):
         serializer = MovieSerializer(movies, many=True, context={"request": request})
         return Response(serializer.data)
 
+    def post(self, request):
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class MovieView(APIView):
 
@@ -43,6 +50,3 @@ class MovieView(APIView):
         movie = self.get_object(id=id)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def post(self, request, id):
-        pass
