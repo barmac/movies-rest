@@ -3,8 +3,9 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView, Response
 
-from .serializers import MovieSerializer
-from .models import Movie
+from .serializers import MovieSerializer, PersonSerializer
+from .models import Movie, Person
+
 
 # Create your views here.
 
@@ -41,6 +42,49 @@ class MovieView(APIView):
     def put(self, request, id):
         movie = self.get_object(id=id)
         serializer = MovieSerializer(movie, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        movie = self.get_object(id=id)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PeopleView(APIView):
+
+    def get(self, request):
+        movies = Person.objects.all()
+        serializer = PersonSerializer(movies, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PersonSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PersonView(APIView):
+
+    def get_object(self, id):
+        try:
+            movie = Person.objects.get(id=id)
+            return movie
+        except Movie.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id):
+        movie = self.get_object(id=id)
+        serializer = PersonSerializer(movie, context={"request": request})
+        return Response(serializer.data)
+
+    def put(self, request, id):
+        movie = self.get_object(id=id)
+        serializer = PersonSerializer(movie, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
