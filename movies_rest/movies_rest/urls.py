@@ -15,14 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
-from movies.views import MoviesView, MovieView, PeopleView, PersonView
+from movies.views import MoviesView, MovieView, PeopleView, PersonView, BaseView
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^movies/$', MoviesView.as_view()),
-    url(r'^movies/(?P<id>(\d)+)/$', MovieView.as_view()),
+    url(r'^movies/(?P<pk>(\d)+)/$', MovieView.as_view()),
     url(r'^people/$', PeopleView.as_view()),
-    url(r'^people/(?P<id>(\d)+)/$', PersonView.as_view()),
-]
+    url(r'^people/(?P<pk>(\d)+)/$', PersonView.as_view(), name='person_detail'),
+    url(r'^$', BaseView.as_view(), name='base'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

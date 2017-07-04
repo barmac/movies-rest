@@ -1,8 +1,9 @@
-from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.views import View
 from rest_framework import status
 from rest_framework.views import APIView, Response
 
+from .forms import MovieForm
 from .serializers import MovieSerializer, PersonSerializer
 from .models import Movie, Person
 
@@ -27,28 +28,25 @@ class MoviesView(APIView):
 
 class MovieView(APIView):
 
-    def get_object(self, id):
-        try:
-            movie = Movie.objects.get(id=id)
-            return movie
-        except Movie.DoesNotExist:
-            raise Http404
+    def get_object(self, pk):
+        movie = get_object_or_404(Movie, pk=pk)
+        return movie
 
-    def get(self, request, id):
-        movie = self.get_object(id=id)
+    def get(self, request, pk):
+        movie = self.get_object(pk=pk)
         serializer = MovieSerializer(movie, context={"request": request})
         return Response(serializer.data)
 
-    def put(self, request, id):
-        movie = self.get_object(id=id)
+    def put(self, request, pk):
+        movie = self.get_object(pk=pk)
         serializer = MovieSerializer(movie, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, id):
-        movie = self.get_object(id=id)
+    def delete(self, request, pk):
+        movie = self.get_object(pk=pk)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -70,27 +68,34 @@ class PeopleView(APIView):
 
 class PersonView(APIView):
 
-    def get_object(self, id):
-        try:
-            movie = Person.objects.get(id=id)
-            return movie
-        except Movie.DoesNotExist:
-            raise Http404
+    def get_object(self, pk):
+        movie = get_object_or_404(Person, pk=pk)
+        return movie
 
-    def get(self, request, id):
-        movie = self.get_object(id=id)
+    def get(self, request, pk):
+        movie = self.get_object(pk=pk)
         serializer = PersonSerializer(movie, context={"request": request})
         return Response(serializer.data)
 
-    def put(self, request, id):
-        movie = self.get_object(id=id)
+    def put(self, request, pk):
+        movie = self.get_object(pk=pk)
         serializer = PersonSerializer(movie, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, id):
-        movie = self.get_object(id=id)
+    def delete(self, request, pk):
+        movie = self.get_object(pk=pk)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BaseView(View):
+
+    def get(self, request):
+        form = MovieForm
+        ctx = {
+            "form": form
+        }
+        return render(request, "movies/content.html", ctx)

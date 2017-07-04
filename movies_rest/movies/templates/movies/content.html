@@ -1,0 +1,14 @@
+{% extends 'movies/base.html' %}
+{% block content %}
+    <form action="" method="post">
+
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button id="submit">Submit</button>
+        <button id="delete">Delete</button>
+    </form>
+
+    {% load static %}
+    <script src="{% static "movies/js/jquery-3.2.1.min.js" %}" charset="utf-8"></script>
+    <script src="{% static "movies/js/app.js" %}"></script>
+{% endblock %}
